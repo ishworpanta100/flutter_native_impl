@@ -14,37 +14,26 @@ class DeviceInfoScreen extends StatefulWidget {
 class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
   static const platform = MethodChannel('device_info_channel');
 
-  int _batteryLevel = 0;
+  final ValueNotifier<int> _batteryLevel = ValueNotifier<int>(0);
+  final ValueNotifier<String> _osVersion = ValueNotifier<String>("Unknown");
 
   Future<void> _getBatteryLevel() async {
-    int batteryLevel;
     try {
       final int result = await platform.invokeMethod('getBatteryLevel');
-      batteryLevel = result;
+      _batteryLevel.value = result;
     } on PlatformException catch (e) {
-      batteryLevel = -1;
+      _batteryLevel.value = -1;
       log("Failed to get battery level: '${e.message}'.");
     }
-    log('Battery Level: $batteryLevel%');
-
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
   }
 
-  String _osVersion = "Unknown";
   Future<void> _getOSVersion() async {
-    String osVersion;
     try {
       final String result = await platform.invokeMethod('getOSVersion');
-      osVersion = result;
+      _osVersion.value = result;
     } on PlatformException catch (e) {
-      osVersion = "Failed to get OS version: '${e.message}'";
+      _osVersion.value = "Failed to get OS version: '${e.message}'";
     }
-
-    setState(() {
-      _osVersion = osVersion;
-    });
   }
 
   @override
@@ -56,6 +45,8 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
   @override
   void dispose() {
     _disableScreenGuard();
+    _batteryLevel.dispose();
+    _osVersion.dispose();
     super.dispose();
   }
 
@@ -64,7 +55,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
       platform.invokeMethod('enableScreenGuard');
     } on PlatformException catch (e) {
       if (kDebugMode) {
-        print('Faiiled to enable screen guard: $e');
+        print('Failed to enable screen guard: $e');
       }
     }
   }
@@ -87,12 +78,21 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Battery Level: $_batteryLevel%', style: const TextStyle(fontSize: 20)),
+            ValueListenableBuilder<int>(
+              valueListenable: _batteryLevel,
+              builder: (context, value, child) {
+                return Text('Battery Level: $value%', style: const TextStyle(fontSize: 20));
+              },
+            ),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: _getBatteryLevel, child: const Text('Get Battery Level')),
-
             const SizedBox(height: 30),
-            Text('OS Version: $_osVersion', style: const TextStyle(fontSize: 20)),
+            ValueListenableBuilder<String>(
+              valueListenable: _osVersion,
+              builder: (context, value, child) {
+                return Text('OS Version: $value', style: const TextStyle(fontSize: 20));
+              },
+            ),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: _getOSVersion, child: const Text('Get OS Version')),
           ],
