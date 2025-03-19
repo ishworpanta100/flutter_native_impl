@@ -3,6 +3,7 @@ import Flutter
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  private var secureTextField = UITextField()
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -16,12 +17,17 @@ import Flutter
         result(self.getBatteryLevel())
       } else if call.method == "getOSVersion" {
         result(self.getOSVersion())
-      } else {
+     } else if (call.method == "enableScreenGuard") {
+        self.enableScreenGuard()
+        result("Secure mode enabled")
+      } else if(call.method == "disableScreenGuard") {
+        self.disableScreenGuard()
+      }
+      else {
         result(FlutterMethodNotImplemented)
       }
     }
 
-    disableScreenRecording()
 
      GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -37,14 +43,34 @@ import Flutter
     return "iOS \(UIDevice.current.systemVersion)"
   }
 
-    private func disableScreenRecording() {
-      let field = UITextField()
-      field.isSecureTextEntry = true
-      window?.addSubview(field)
-      field.centerYAnchor.constraint(equalTo: window!.centerYAnchor).isActive = true
-      field.centerXAnchor.constraint(equalTo: window!.centerXAnchor).isActive = true
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-          field.removeFromSuperview()
+@objc func enableScreenGuard() {
+          DispatchQueue.main.async {
+              let field = UITextField()
+                         self.secureTextField = field 
+                         let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
+                         let image = UIImageView(image: UIImage())
+                         image.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                         field.isSecureTextEntry = true
+                         self.window?.addSubview(field)
+                         view.addSubview(image)
+                         self.window?.layer.superlayer?.addSublayer(field.layer)
+                         field.layer.sublayers?.last?.addSublayer(self.window?.layer ?? CALayer())
+                         field.leftView = view
+                         field.leftViewMode = .always
+          }
       }
-    }
+ @objc func disableScreenGuard() {
+          DispatchQueue.main.async {
+              let field = UITextField()
+              self.secureTextField = field
+              field.isSecureTextEntry = false
+              field.removeFromSuperview()
+                    if let window = self.window {
+                        let rootViewController = window.rootViewController
+                        window.rootViewController = nil
+                        window.rootViewController = rootViewController
+                        window.makeKeyAndVisible()
+                    }
+          }
+      }
 }

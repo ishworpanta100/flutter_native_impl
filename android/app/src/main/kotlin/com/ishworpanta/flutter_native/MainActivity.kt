@@ -14,10 +14,6 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -36,6 +32,14 @@ class MainActivity : FlutterActivity() {
                     val osVersion = getOSVersion()
                     result.success(osVersion)
                 }
+                "enableScreenGuard"-> {
+                  enableScreenGuard()
+                    result.success("Secure mode enabled")
+                }
+                "disableScreenGuard" ->{
+                   disableScreenGuard()
+                    result.success("Secure mode disabled")
+                }
                 else -> result.notImplemented()
             }
         }
@@ -52,5 +56,15 @@ class MainActivity : FlutterActivity() {
     }
     private fun getOSVersion(): String {
         return "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})"
+    }
+
+    private fun enableScreenGuard() {
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+    }
+    private fun disableScreenGuard() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
 }

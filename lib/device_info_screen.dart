@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,6 +45,38 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
     setState(() {
       _osVersion = osVersion;
     });
+  }
+
+  @override
+  void initState() {
+    _enableScreenGuard();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _disableScreenGuard();
+    super.dispose();
+  }
+
+  Future<void> _enableScreenGuard() async {
+    try {
+      platform.invokeMethod('enableScreenGuard');
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        print('Faiiled to enable screen guard: $e');
+      }
+    }
+  }
+
+  Future<void> _disableScreenGuard() async {
+    try {
+      platform.invokeMethod('disableScreenGuard');
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        print('Failed to disable screen guard: $e');
+      }
+    }
   }
 
   @override
