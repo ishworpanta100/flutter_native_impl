@@ -20,6 +20,9 @@ import Flutter
         result(FlutterMethodNotImplemented)
       }
     }
+
+    disableScreenRecording()
+
      GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -33,4 +36,15 @@ import Flutter
   private func getOSVersion() -> String {
     return "iOS \(UIDevice.current.systemVersion)"
   }
+
+    private func disableScreenRecording() {
+      let field = UITextField()
+      field.isSecureTextEntry = true
+      window?.addSubview(field)
+      field.centerYAnchor.constraint(equalTo: window!.centerYAnchor).isActive = true
+      field.centerXAnchor.constraint(equalTo: window!.centerXAnchor).isActive = true
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+          field.removeFromSuperview()
+      }
+    }
 }

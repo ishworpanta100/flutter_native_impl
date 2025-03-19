@@ -1,7 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_native/device_info_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,72 +10,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: BatteryScreen());
-  }
-}
-
-class BatteryScreen extends StatefulWidget {
-  const BatteryScreen({super.key});
-
-  @override
-  BatteryScreenState createState() => BatteryScreenState();
-}
-
-class BatteryScreenState extends State<BatteryScreen> {
-  static const platform = MethodChannel('device_info_channel');
-
-  int _batteryLevel = 0;
-
-  Future<void> _getBatteryLevel() async {
-    int batteryLevel;
-    try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
-      batteryLevel = result;
-    } on PlatformException catch (e) {
-      batteryLevel = -1;
-      log("Failed to get battery level: '${e.message}'.");
-    }
-    log('Battery Level: $batteryLevel%');
-
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
-  }
-
-  String _osVersion = "Unknown";
-  Future<void> _getOSVersion() async {
-    String osVersion;
-    try {
-      final String result = await platform.invokeMethod('getOSVersion');
-      osVersion = result;
-    } on PlatformException catch (e) {
-      osVersion = "Failed to get OS version: '${e.message}'";
-    }
-
-    setState(() {
-      _osVersion = osVersion;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Battery Level')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Battery Level: $_batteryLevel%', style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _getBatteryLevel, child: const Text('Get Battery Level')),
-
-            const SizedBox(height: 30),
-            Text('OS Version: $_osVersion', style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _getOSVersion, child: const Text('Get OS Version')),
-          ],
-        ),
-      ),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: DeviceInfoScreen());
   }
 }
